@@ -5,18 +5,18 @@
 # include  <stdint.h>
 # include  <stdbool.h>
 
-// # include "huffman.h"
+# include "huffman.h"
 
 
-typedef struct treeNode treeNode;
+// typedef struct treeNode treeNode;
 
-struct treeNode
-{
-	uint8_t   symbol;
-	uint64_t  count;
-	bool      leaf;
-	treeNode *left , *right;
-};
+// struct treeNode
+// {
+	// uint8_t   symbol;
+	// uint64_t  count;
+	// bool      leaf;
+	// treeNode *left , *right;
+// };
 
 //  treeNode  defined  in  huffman.h
 
@@ -30,7 +30,7 @@ typedef  struct  queue
 
 queue *newQueue(uint32_t  size); //  Constructor
 
-void    delQueue(queue *q);       //  Destructor
+void  delQueue(queue *q);       //  Destructor
 
 bool  empty(queue *q);             // Is it empty?
 

@@ -80,13 +80,27 @@ bool enqueue(queue *q, treeNode i) // Add an item
 		}
 		else
 		{
+			// for(uint32_t b = q->head; b != q->tail; b = ((b-1) % q->size))
+			// {
+				// if(i.count < q->Q[b].count)
+				// {
+					// q->Q[b+1] = q->Q[b];
+				// }
+				// else
+				// {
+					// break;
+				// }
+			// }
+			// q->head = (q->head +1) % q->size;
+			// return 1;
+
 			for(uint32_t a = (q->tail); a != q->head; a = ((a+1) % q->size))
 			{//transversal through list from tail to head
 				if(i.count <= q->Q[a].count)		//if less than
 				{
 					for(uint32_t b = q->head; b != a; b = ((b-1) % q->size))
 					{	//have to go backwards so no overwrite
-						q->Q[b]= q->Q[b-1];		//shift array over
+						q->Q[b]= q->Q[(b-1)%q->size];		//shift array over
 					}
 					q->Q[a] = i;
 					q->head = (q->head +1) % q->size;

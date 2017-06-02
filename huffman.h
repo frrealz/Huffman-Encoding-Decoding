@@ -1,13 +1,16 @@
 # ifndef  _HUFFMAN_H
 # define  _HUFFMAN_H
-# include  <stdint.h>
-# include  <stdbool.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <stdint.h>
+# include <stdbool.h>
+# include <ctype.h>
 # ifndef  NIL
 # define  NIL (void *) 0
 # endif
 
-typedef  struct  DAH  treeNode;
-struct  DAH
+typedef  struct  treeNode  treeNode;
+struct  treeNode
 {
 	uint8_t   symbol;
 	uint64_t  count;
@@ -28,7 +31,7 @@ treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
 int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code);
 
 // Parse a Huffman  tree to  build  codes
-void  buildCode(treeNode *t, code s, code  table [256]);
+void  buildCode(treeNode *t, uint32_t s, uint32_t  table [256]);
 
 //  Delete a tree
 void *delTree(treeNode *t);
@@ -41,4 +44,12 @@ static  inline  int8_t  compare(treeNode *l, treeNode *r)
 }
 
 treeNode *join(treeNode *l, treeNode *r); // Join  two  subtrees
+
+
+
+
+//from Darrell
+static inline void spaces(int c) { for (int i = 0; i < c; i += 1) { putchar(' '); } return; }
+
+void printTree(treeNode *t, int depth);
 # endif
