@@ -5,6 +5,7 @@
 # include <getopt.h>
 # include <string.h>
 # include <fcntl.h>
+# include <math.h>
 
 
 
@@ -82,19 +83,21 @@ int main(int argc, char **argv)
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
 	//creating priority queue
-	queue *priorityQueue = newQueue(256);
+	queue *priorityQueue = newQueue(10000);
 	
 	for(int i = 0; i < 256; i++)
 	{
 		if(histogram[i] != 0)
 		{
+			// printf("%d\n", i);
 			treeNode *newTree = newNode(i, 0, histogram[i]);	//new node for each item in histogram
 			enqueue(priorityQueue, *newTree);							//puts each node in priority queue
 		}
 	}
 	
-	while(empty(priorityQueue) != 0)	//joins two smallest items in queue
+	while(abs(priorityQueue->head - priorityQueue->tail) != 1)	//joins two smallest items in queue
 	{
+		printf("HELLO\n");
 		treeNode *leaf0 = malloc(sizeof(treeNode));
 		leaf0->left = malloc(sizeof(treeNode));
 		leaf0->right = malloc(sizeof(treeNode));
@@ -109,15 +112,42 @@ int main(int argc, char **argv)
 		leaf1->leaf = 1;
 		
 		treeNode *internalNode = join(leaf0, leaf1);	//joins two leaf
-		// internalNode->symbol = '$';
-		// internalNode->count = leaf0->count + leaf1->count;
-		// internalNode->leaf = 0;
-		
 		enqueue(priorityQueue, *internalNode);
 	}
 	
 	
-	printTree(priorityQueue->Q, 4);
+	
+	
+	do
+		{
+		
+		printf("head: %u\n", priorityQueue->head);
+		printf("tail: %u\n", priorityQueue->tail);
+			uint32_t pop = 100000;
+			printf("Popping %u elements\n", pop);
+			for (uint32_t i = 0; i < pop; i += 1)
+			{
+					if (empty(priorityQueue))
+					{
+							printf("Woah! Empty after only %u!\n", i);
+							break;
+					}
+					else
+					{
+						treeNode *newTree1 = malloc(sizeof(treeNode));
+						newTree1->left = malloc(sizeof(treeNode));
+						newTree1->right = malloc(sizeof(treeNode));
+							(void) dequeue(priorityQueue, newTree1);
+							printf("\t%4lu\n", newTree1->count);
+					}
+			}
+	} while (!empty(priorityQueue));
+	
+
+	
+	
+	printTree(priorityQueue->Q, 1);
+	// printTree(internalNode, 1);
 	
 	
 	
@@ -181,6 +211,7 @@ int main(int argc, char **argv)
 	// } while (!empty(q));
 
 	
+
 	
 	
 	
