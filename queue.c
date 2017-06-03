@@ -19,6 +19,7 @@ queue *newQueue(uint32_t  size)
 // Destructor
 void delQueue(queue *q)      
 {
+	free(q->Q);
 	free(q);
 }
 
