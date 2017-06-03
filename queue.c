@@ -1,28 +1,29 @@
 # include "queue.h"
 
 
-typedef  treeNode  item; //  treeNode  defined  in  huffman.h
+typedef  treeNode  item; // treeNode defined in huffman.h
 
 
-
-queue *newQueue(uint32_t  size) //  Constructor
+// Constructor
+queue *newQueue(uint32_t  size) 
 {
-	queue *newQueue = malloc(sizeof(queue));
-	newQueue->size = size;
-	newQueue->head = 0;
-	newQueue->tail = 0;
-	newQueue->Q = malloc(sizeof(treeNode));
+	queue *newQ = malloc(sizeof(queue));
+	newQ->size = size;
+	newQ->head = 0;
+	newQ->tail = 0;
 	
-	return (newQueue);
+	return (newQ);
 }
 
-void delQueue(queue *q)      //  Destructor
+// Destructor
+void delQueue(queue *q)      
 {
 	free(q->Q);
 	free(q);
 }
 
-bool  empty(queue *q)          // Is it empty?
+// Check for empty
+bool  empty(queue *q)          
 {
 	if(q->head == q->tail)
 	{
@@ -34,7 +35,8 @@ bool  empty(queue *q)          // Is it empty?
 	}
 }
 
-bool full (queue *q)         // Is it full?
+// Check for full
+bool full (queue *q)        
 {
 	if(((q->head + 1) % q->size) == ((q->tail) % q->size))
 	{
@@ -46,32 +48,21 @@ bool full (queue *q)         // Is it full?
 	}
 }
 
-// typedef  struct  queue
-// {
-	// uint32_t  size;         // How big is it?
-	// uint32_t  head , tail; //  Front  and  rear  locations
-	// item *Q;                // Array to hold it (via  calloc)
-// } queue;
 
-
-// typedef  struct  DAH  treeNode;
-// struct  DAH
-// {
-	// uint8_t   symbol;
-	// uint64_t  count;
-	// bool      leaf;
-	// treeNode *left , *right;
-// };
-
-bool enqueue(queue *q, treeNode i) // Add an item
+// Add an item to the queue
+/*
+Seg fault solved
+ - Issue was when going backwards while head == 0
+ - Cannot modulo in reverse (-1 % q->size)
+New issue: won't check over gap when comparing counts
+ - Will pick numbers in order if looped over gap
+ */
+bool enqueue(queue *q, treeNode i)
 {
-//right now we get a segmentation fault (try queue size = 20)
-//when we reach the end of the queue
-//I think it's not wrapping around?
-	bool check = full(q);
-	if(check == 0)//not full
+	// Check if full
+	if(full(q) == 0)
 	{
-		//insertion sort
+		// Insertion sort
 		if(q->head == q->tail)//if only one
 		{
 			q->Q[q->head] = i;
@@ -80,33 +71,38 @@ bool enqueue(queue *q, treeNode i) // Add an item
 		}
 		else
 		{
-			// for(uint32_t b = q->head; b != q->tail; b = ((b-1) % q->size))
-			// {
-				// if(i.count < q->Q[b].count)
-				// {
-					// q->Q[b+1] = q->Q[b];
-				// }
-				// else
-				// {
-					// break;
-				// }
-			// }
-			// q->head = (q->head +1) % q->size;
-			// return 1;
-
+			// Transversal through list from tail to head
 			for(uint32_t a = (q->tail); a != q->head; a = ((a+1) % q->size))
-			{//transversal through list from tail to head
-				if(i.count <= q->Q[a].count)		//if less than
+			{
+				// Compare counts of queue items
+				if(i.count <= q->Q[a].count)		
 				{
-					for(uint32_t b = q->head; b != a; b = ((b-1) % q->size))
-					{	//have to go backwards so no overwrite
-						q->Q[b]= q->Q[(b-1)%q->size];		//shift array over
+					// Traverse backwards to avoid overwrite
+					uint32_t b = q->head;
+
+					while(b != a)
+					{
+						// If head is 0, skip to the other end
+						if(b == 0)
+						{
+							// Shift array over to other end
+							q->Q[b]= q->Q[q->size];
+							b = q->size;
+						}
+						else
+						{
+							// Shift array over
+							q->Q[b]= q->Q[b-1];	
+							b--;
+						}
 					}
+					// Insert item
 					q->Q[a] = i;
 					q->head = (q->head +1) % q->size;
 					return 1;
 				}
 			}
+			// Insert item
 			q->Q[q->head] = i;
 			q->head = (q->head +1) % q->size;
 			return 1;
@@ -114,13 +110,15 @@ bool enqueue(queue *q, treeNode i) // Add an item
 	}
 	else
 	{
-		printf("queue full\n");
+		printf("Queue is full\n");
 	}
 	return 0;
 }
 
-bool dequeue(queue *q, treeNode *i) //  Remove  from  the  rear
-{//from Darrell's code
+// Remove from the rear
+bool dequeue(queue *q, treeNode *i) 
+{
+	// From Darrell's code
 	if (empty(q))
 	{
 		return false;
@@ -132,25 +130,6 @@ bool dequeue(queue *q, treeNode *i) //  Remove  from  the  rear
 		return true;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
