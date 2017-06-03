@@ -5,6 +5,9 @@
 # include <stdint.h>
 # include <stdbool.h>
 # include <ctype.h>
+
+# include "stack.h"
+
 # ifndef  NIL
 # define  NIL (void *) 0
 # endif
@@ -31,7 +34,7 @@ treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
 int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code);
 
 // Parse a Huffman  tree to  build  codes
-void  buildCode(treeNode *t, uint32_t s, uint32_t  table [256]);
+void  buildCode(treeNode *t, stack *s, uint32_t  table [256]);
 
 //  Delete a tree
 void *delTree(treeNode *t);
@@ -44,9 +47,6 @@ static  inline  int8_t  compare(treeNode *l, treeNode *r)
 }
 
 treeNode *join(treeNode *l, treeNode *r); // Join  two  subtrees
-
-
-
 
 //from Darrell
 static inline void spaces(int c) { for (int i = 0; i < c; i += 1) { putchar(' '); } return; }
