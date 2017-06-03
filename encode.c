@@ -89,15 +89,20 @@ int main(int argc, char **argv)
 	{
 		if(histogram[i] != 0)
 		{
-			// printf("%d\n", i);
+			///printf("%d\n", i);
 			treeNode *newTree = newNode(i, 0, histogram[i]);	//new node for each item in histogram
 			enqueue(priorityQueue, *newTree);							//puts each node in priority queue
+			//printf("symbol: %x, count: %lu, leaf: %d\n", newTree->symbol, newTree->count, newTree->leaf);
 		}
 	}
+	printf("\n");
 	
-	while(abs(priorityQueue->head - priorityQueue->tail) != 1)	//joins two smallest items in queue
-	{
-		printf("HELLO\n");
+	
+	///////////////////////////////////////////////////////////////////////////////////////
+	//trying to make huffman tree
+	treeNode *root = newNode('$', 0, 0);
+	while(abs(priorityQueue->head - priorityQueue->tail) != 1)	//until only one item left in queue, which is root
+	{//joins two smallest items in queue
 		treeNode *leaf0 = malloc(sizeof(treeNode));
 		leaf0->left = malloc(sizeof(treeNode));
 		leaf0->right = malloc(sizeof(treeNode));
@@ -108,50 +113,97 @@ int main(int argc, char **argv)
 		
 		dequeue(priorityQueue, leaf0);
 		dequeue(priorityQueue, leaf1);
-		leaf0->leaf = 1;
-		leaf1->leaf = 1;
+		// printf("symbol: %x, count: %lu, leaf: %d\n", leaf0->symbol, leaf0->count, leaf0->leaf);
+		if(leaf0->symbol != 0x24)
+		{
+			leaf0->leaf = 1;
+		}
+		if(leaf1->symbol != 0x24)
+		{
+			leaf1->leaf = 1;
+		}
 		
 		treeNode *internalNode = join(leaf0, leaf1);	//joins two leaf
+		//debug
+		// printf("HEAD symbol: %x, count: %lu, leaf: %d\n", internalNode->symbol, internalNode->count, internalNode->leaf);
+		// printf("RIGHT symbol: %x, count: %lu, leaf: %d\n", internalNode->right->symbol, internalNode->right->count, internalNode->right->leaf);
+		// printf("LEFT symbol: %x, count: %lu, leaf: %d\n", internalNode->left->symbol, internalNode->left->count, internalNode->left->leaf);
 		enqueue(priorityQueue, *internalNode);
+		
+		//printf("symbol: %x, count: %lu, leaf: %d\n\n", priorityQueue->Q[3].symbol, priorityQueue->Q->count, priorityQueue->Q->leaf);
+		if(abs(priorityQueue->head - priorityQueue->tail) == 1)//set root when only one item left in queue
+		{
+			*root = *internalNode;
+		}
 	}
 	
+	//delete priority Queue
+	delQueue(priorityQueue);
+	///////////////////////////////////////////////////////////////////////////////////////
 	
 	
 	
-	do
-		{
+	printTree(root, 1);
+	
+	
+	///////////////////////////////////////////////////////////////////////////////////////
+	//Make the code for each character
+	uint32_t code[256] = {0};			//code for each character
+	stack *stack = newStack();
+	buildCode(root, stack, code);
+	
+	
+	for(int i = 0; i < 256; i++)
+	{
+		if(code[i] != 0)
+		printf("symbol %c: %u\n", i, code[i]);
+	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////
+	//dequeue to test to see if huffman tree works
+	
+	// do
+		// {
 		
-		printf("head: %u\n", priorityQueue->head);
-		printf("tail: %u\n", priorityQueue->tail);
-			uint32_t pop = 100000;
-			printf("Popping %u elements\n", pop);
-			for (uint32_t i = 0; i < pop; i += 1)
-			{
-					if (empty(priorityQueue))
-					{
-							printf("Woah! Empty after only %u!\n", i);
-							break;
-					}
-					else
-					{
-						treeNode *newTree1 = malloc(sizeof(treeNode));
-						newTree1->left = malloc(sizeof(treeNode));
-						newTree1->right = malloc(sizeof(treeNode));
-							(void) dequeue(priorityQueue, newTree1);
-							printf("\t%4lu\n", newTree1->count);
-					}
-			}
-	} while (!empty(priorityQueue));
-	
+		// printf("head: %u\n", priorityQueue->head);
+		// printf("tail: %u\n", priorityQueue->tail);
+			// uint32_t pop = 100000;
+			// printf("Popping %u elements\n", pop);
+			// for (uint32_t i = 0; i < pop; i += 1)
+			// {
+					// if (empty(priorityQueue))
+					// {
+							// printf("Woah! Empty after only %u!\n", i);
+							// break;
+					// }
+					// else
+					// {
+						// treeNode *newTree1 = malloc(sizeof(treeNode));
+						// newTree1->left = malloc(sizeof(treeNode));
+						// newTree1->right = malloc(sizeof(treeNode));
+							// (void) dequeue(priorityQueue, newTree1);
+							// printf("\t%4lu\n", newTree1->count);
+					// }
+			// }
+	// } while (!empty(priorityQueue));
+
 
 	
 	
-	printTree(priorityQueue->Q, 1);
+	//printTree(priorityQueue->Q, 1);
+	
+	
+	// printf("symbol: %x, count: %lu, leaf: %d\n", priorityQueue->Q->symbol, priorityQueue->Q->count, priorityQueue->Q->leaf);
+	// printf("symbol: %x, count: %lu, leaf: %d\n", 
+	// priorityQueue->Q->left->symbol, priorityQueue->Q->left->count, priorityQueue->Q->left->leaf);
+	// printf("symbol: %x, count: %lu, leaf: %d\n", 
+	// priorityQueue->Q->right->symbol, priorityQueue->Q->right->count, priorityQueue->Q->right->leaf);
 	// printTree(internalNode, 1);
 	
 	
-	
-	
+	///////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////
 	
 	
 	
