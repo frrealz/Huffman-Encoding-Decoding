@@ -5,8 +5,8 @@ CFLAGS = -Wall -Wextra -Werror -pedantic -g
 all: encode
 
 		
-encode		:	encode.o queue.o huffman.o
-		$(CC) $(CFLAGS) queue.o huffman.o -o encode encode.o
+encode		:	encode.o queue.o huffman.o stack.o
+		$(CC) $(CFLAGS) queue.o huffman.o stack.o -o encode encode.o
 encode.o	:	encode.c
 		$(CC) $(CFLAGS) -c encode.c
 		
@@ -14,6 +14,8 @@ queue.o	:	queue.c huffman.c
 		$(CC) $(CFLAGS) -c 	queue.c			
 huffman.o	:	huffman.c
 		$(CC) $(CFLAGS) -c 	huffman.c				
-
+stack.o	:	stack.c
+		$(CC) $(CFLAGS) -c 	stack.c	
+		
 clean	:
 		rm encode.o encode
