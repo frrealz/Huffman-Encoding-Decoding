@@ -11,6 +11,7 @@ queue *newQueue(uint32_t  size)
 	newQ->size = size;
 	newQ->head = 0;
 	newQ->tail = 0;
+	newQ->Q = malloc(sizeof(treeNode));
 	
 	return (newQ);
 }
@@ -18,7 +19,6 @@ queue *newQueue(uint32_t  size)
 // Destructor
 void delQueue(queue *q)      
 {
-	free(q->Q);
 	free(q);
 }
 
@@ -63,7 +63,7 @@ bool enqueue(queue *q, treeNode i)
 	if(full(q) == 0)
 	{
 		// Insertion sort
-		if(q->head == q->tail)//if only one
+		if(q->head == q->tail)
 		{
 			q->Q[q->head] = i;
 			q->head = (q->head +1) % q->size;
@@ -72,14 +72,15 @@ bool enqueue(queue *q, treeNode i)
 		else
 		{
 			// Transversal through list from tail to head
-			for(uint32_t a = (q->tail); a != q->head; a = ((a+1) % q->size))
+			uint32_t a = (q->tail);
+			while(a != q->head)			//; a = ((a+1) % q->size))
 			{
 				// Compare counts of queue items
+				//printf("\n\t a = %d --- aCount = %llu --- iCount = %llu \n", a, q->Q[a].count, i.count);
 				if(i.count <= q->Q[a].count)		
 				{
 					// Traverse backwards to avoid overwrite
 					uint32_t b = q->head;
-
 					while(b != a)
 					{
 						// If head is 0, skip to the other end
@@ -100,6 +101,15 @@ bool enqueue(queue *q, treeNode i)
 					q->Q[a] = i;
 					q->head = (q->head +1) % q->size;
 					return 1;
+				}
+
+				if(a == q->size)
+				{
+					a = 0;
+				}
+				else
+				{
+					a++;
 				}
 			}
 			// Insert item
@@ -130,6 +140,4 @@ bool dequeue(queue *q, treeNode *i)
 		return true;
 	}
 }
-
-
 
