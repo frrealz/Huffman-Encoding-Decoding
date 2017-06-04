@@ -6,11 +6,13 @@
 # include <string.h>
 # include <fcntl.h>
 # include <math.h>
-
+# include <errno.h>
 
 
 # include "queue.h"
 # include "huffman.h"
+# include "code.h"
+
 # define MAX 10
 # include <time.h>
 
@@ -50,21 +52,22 @@ int main(int argc, char **argv)
 	}
 	
 	char buffer[1];
-	FILE *file;
+	int file;
 	if(inputFile)
 	{
 		printf("tried to open\n\n");
-		file = fopen(inputFile, "r");
+		file = open(inputFile, O_RDONLY);
 
 	}
-	if (file == NULL)
+	if (file == -1)
 	{
+		perror(inputFile);
+		exit(errno);
         printf("Error Opening %s\n", inputFile);
     }
 	else
 	{
-		fseek(file, SEEK_SET, 0);		//beginning of file
-		while( fread(buffer, 1, 1, file) == 1 )
+		while( read(file, buffer, 1) == 1 )
 		{
 			int index = (int) buffer[0];
 			histogram[ index ]++;
@@ -148,15 +151,26 @@ int main(int argc, char **argv)
 	
 	///////////////////////////////////////////////////////////////////////////////////////
 	//Make the code for each character
-	uint32_t code[256] = {0};			//code for each character
-	stack *stack = newStack();
-	buildCode(root, stack, code);
+	code code = newCode();
+	struct code codeTable[256];
+	for(int i = 0; i < 256; i++)	//new code for each of 256 bits
+	{
+		codeTable[i] = newCode();
+	}
+	
+
+	buildCode(root, code, codeTable);
 	
 	
 	for(int i = 0; i < 256; i++)
 	{
-		if(code[i] != 0)
-		printf("symbol %c: %u\n", i, code[i]);
+		if(codeTable[i].l != 0)
+		{
+
+			//printf("symbol %c: %x, length: %u\n", i, codeTable[i].bits[0], codeTable[i].l);
+		}
+		
+		
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////
