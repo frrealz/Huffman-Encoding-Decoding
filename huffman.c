@@ -1,15 +1,5 @@
 # include "huffman.h"
 
-// typedef  struct  DAH  treeNode;
-// struct  DAH
-// {
-	// uint8_t   symbol;
-	// uint64_t  count;
-	// bool      leaf;
-	// treeNode *left , *right;
-// };
-
-
 treeNode *newNode(uint8_t s, bool l, uint64_t c)
 {
 	treeNode *newTree = malloc(sizeof(treeNode));
@@ -71,16 +61,28 @@ int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code)
 }
 
 // Parse a Huffman  tree to  build  codes
-void  buildCode(treeNode *t, uint32_t s, uint32_t table [256])
+void  buildCode(treeNode *t, code s, code table[256])
 {
-	//just to test
-	if(s)
+	if (t && t->leaf)
 	{
+		table[t->symbol] = s;
 		
+		//so you only get correct codes if you print in reverse
+		printf("symbol %c: %x, length: %u\n", t->symbol, s.bits[0], s.l);
 	}
-	if(table && t)
+	else if (t)
 	{
+		printf("push 0\n");
+		pushCode(&s, 0);
+		buildCode(t->left, s, table);				//left side
 		
+		
+		uint32_t pop = 2;
+		printf("pop\n");
+		popCode(&s, &pop);
+		printf("push 1\n");
+		pushCode(&s, 1);
+		buildCode(t->right, s, table);				//right side
 	}
 	return;
 }
@@ -100,7 +102,7 @@ void *delTree(treeNode *t)
 
 treeNode *join(treeNode *l, treeNode *r)// Join  two  subtrees
 {
-	treeNode *head = newNode('$', 1, (r->count + l->count));
+	treeNode *head = newNode(0x24, 0, (r->count + l->count));
 	head->left = l;
 	head->right = r;
 	
