@@ -7,18 +7,21 @@
 # include <fcntl.h>
 # include <math.h>
 # include <errno.h>
-
+# include <time.h>
 
 # include "queue.h"
 # include "huffman.h"
 # include "code.h"
 
 # define MAX 10
-# include <time.h>
+
+
 
 
 int main(int argc, char **argv)
 {
+	uint32_t magicNumber = 0xDEADD00D;
+	
 	uint32_t histogram[256] = {0};		//histogram
 	for(int i = 0; i < 256; i++)		//initialize everything to 0
 	{
@@ -26,6 +29,7 @@ int main(int argc, char **argv)
 	}
 	
 	char *inputFile = NULL;
+	char *outputFile = NULL;
 	int c;
 	while ((c = getopt(argc, argv, "i:o:v")) != -1)
 	{
@@ -38,6 +42,7 @@ int main(int argc, char **argv)
 			}
 			case 'o':
 			{
+				outputFile = optarg;
 				break;
 			}
 			case 'v':
@@ -57,7 +62,6 @@ int main(int argc, char **argv)
 	{
 		printf("tried to open\n\n");
 		file = open(inputFile, O_RDONLY);
-
 	}
 	if (file == -1)
 	{
@@ -75,13 +79,8 @@ int main(int argc, char **argv)
 		histogram[0]++;
 		histogram[255]++;
 	}
-
-	
-	
-	// for(int i = 0; i < 256; i++)
-	// {
-		// printf("%d: %u\n", i, histogram[i]);
-	// }		
+	close(file);
+		
 	
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,22 +157,54 @@ int main(int argc, char **argv)
 		codeTable[i] = newCode();
 	}
 	
-
-	buildCode(root, code, codeTable);
+	uint16_t leafCount = 0;
+	buildCode(root, code, codeTable, &leafCount);
 	
 	
 	for(int i = 0; i < 256; i++)
 	{
 		if(codeTable[i].l != 0)
 		{
-
 			//printf("symbol %c: %x, length: %u\n", i, codeTable[i].bits[0], codeTable[i].l);
 		}
-		
-		
 	}
 	
 	///////////////////////////////////////////////////////////////////////////////////////
+	//write to output file
+
+	//gets input file length
+	FILE *filePointer = fopen(inputFile, "r");
+	fseek(filePointer, 0, SEEK_END);
+	uint64_t inputFileLength = ftell(filePointer);
+
+	
+	uint16_t treeSize = 3*leafCount - 1;
+	
+	
+	if(outputFile)	//writes to outputFile
+	{
+		file = open(outputFile, O_WRONLY);
+		write(file, &magicNumber, sizeof(uint32_t));
+		write(file, &inputFileLength, sizeof(uint64_t));
+		write(file, &treeSize, sizeof(uint16_t));
+		dumpTree(root, file);
+		close(file);
+		fclose(filePointer);
+	}
+	else			//writes to standard output
+	{
+		write(1, &magicNumber, sizeof(uint32_t));
+		write(1, &inputFileLength, sizeof(uint64_t));
+		write(1, &treeSize, sizeof(uint16_t));
+		dumpTree(root, 1);
+	}
+	
+	printf("\n");
+	
+	
+	
+	
+	
 	///////////////////////////////////////////////////////////////////////////////////////
 	//dequeue to test to see if huffman tree works
 	
