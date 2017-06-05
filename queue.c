@@ -78,7 +78,7 @@ bool enqueue(queue *q, treeNode i)
 			{
 				// Compare counts of queue items
 				//printf("\n\t a = %d --- aCount = %llu --- iCount = %llu \n", a, q->Q[a].count, i.count);
-				if(i.count <= q->Q[a].count)		
+				if(i.count < q->Q[a].count)		
 				{
 					// Traverse backwards to avoid overwrite
 					uint32_t b = q->head;
@@ -141,4 +141,3 @@ bool dequeue(queue *q, treeNode *i)
 		return true;
 	}
 }
-
