@@ -5,6 +5,7 @@
 # include <stdint.h>
 # include <stdbool.h>
 # include <ctype.h>
+# include <unistd.h>
 
 # include "code.h"
 
@@ -34,7 +35,7 @@ treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
 int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code);
 
 // Parse a Huffman  tree to  build  codes
-void  buildCode(treeNode *t, code s, code table [256]);
+void  buildCode(treeNode *t, code s, code table [256], uint16_t *leafCount);
 
 //  Delete a tree
 void *delTree(treeNode *t);
