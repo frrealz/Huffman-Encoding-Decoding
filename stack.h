@@ -1,26 +1,26 @@
-//from Darrell
 # ifndef _STACK_H
 # define _STACK_H
 # include <stdint.h>
 # include <stdbool.h>
 
+# include "huffman.h"
+
 typedef struct stack
 {
         uint32_t size;
         uint32_t top;
-        int *entries;
+        treeNode *entries;
 } stack;
-
 
 stack *newStack();
 
 void delStack(stack *);
 
-int pop(stack *);
+treeNode *pop(stack *);
 
-void push(stack *, int);
+void push(stack *, treeNode *i);
 
 bool emptyS(stack *);
 
+#endif
 
-# endif
