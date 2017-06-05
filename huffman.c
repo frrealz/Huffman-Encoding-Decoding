@@ -58,18 +58,32 @@ void  dumpTree(treeNode *t, int file)
 // Build a tree  from  the  saved  tree
 treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
 {
-	//just to test
-	treeNode *test = newNode(1, 0, 3);
-	if(savedTree)
-	{
-		
-	}
-	if(treeBytes)
-	{
-		
-	}
-	return test;
+	stackT *decStack = newStack();
+
+	for (uint16_t i = 0; i < treeBytes; i++)  
+	{  	
+		if(strncmp((char *)&savedTree[i],"L", 1) == 0)
+		{
+			i++;
+			treeNode *node = newNode(savedTree[i], 1, 0);
+			printf("L%c ", node->symbol);
+			push(decStack, node);
+
+		}
+		else if (strncmp((char *)&savedTree[i],"I", 1) == 0)
+		{
+			printf("I ");
+			treeNode *right = pop(decStack);
+			printf("pop %c ", right->symbol);
+			treeNode *left = pop(decStack);
+			printf("pop %c ", left->symbol);
+			treeNode *nodeI = join(left, right);
+			push(decStack, nodeI);
+		}
+		//printf("Stack top = %d\n", decStack->top);
+    }
 	
+	return pop(decStack);
 }
 
 // Step  through a tree  following  the  code
