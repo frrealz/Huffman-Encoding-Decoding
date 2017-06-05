@@ -55,6 +55,7 @@ void  dumpTree(treeNode *t, int file)
 	return;
 }
 
+/*
 // Build a tree  from  the  saved  tree
 treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
 {
@@ -85,6 +86,8 @@ treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
 	
 	return pop(decStack);
 }
+*/
+
 
 // Step  through a tree  following  the  code
 int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code)
