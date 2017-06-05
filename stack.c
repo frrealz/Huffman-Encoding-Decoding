@@ -1,7 +1,3 @@
-# include <stdio.h>
-# include <stdlib.h>
-# include <stdint.h>
-# include <stdbool.h>
 # include "stack.h"
 
 # define MIN_STACK 10
@@ -11,34 +7,34 @@ stack *newStack()
         stack *s = (stack *) calloc(MIN_STACK, sizeof(stack));
         s->size = MIN_STACK;
         s->top  = 0;
-        s->entries = (int *) calloc(MIN_STACK, sizeof(int));
+        s->entries = (treeNode *) calloc(MIN_STACK, sizeof(treeNode));
         return s;
 }
 
 void delStack(stack *s) { free(s->entries); free(s); return; }
 
-int pop(stack *s)
+treeNode *pop(stack *s)
 {
         if (s->top > 0)
         {
             s->top -= 1;
-            return s->entries[s->top];
+            return &s->entries[s->top];
         }
         else
         {
-			printf("invalid in stack\n");
-            return 0;
+            printf("Invalid in stack\n");
+            return &s->entries[s->top];
         }
 }
 
-void push(stack *s, int i)
+void push(stack *s, treeNode *i)
 {
         if (s->top == s->size)
         {
                 s->size *= 2;
-                s->entries = (int *) realloc(s->entries, s->size * sizeof(int));
+                s->entries = (treeNode *) realloc(s->entries, s->size * sizeof(treeNode));
         }
-        s->entries[s->top] = i;
+        s->entries[s->top] = *i;
         s->top += 1;
         return;
 
@@ -46,5 +42,7 @@ void push(stack *s, int i)
 
 bool emptyS(stack *s)
 {
-	return (s->top == 0);
+    return (s->top == 0);
 }
+
+
