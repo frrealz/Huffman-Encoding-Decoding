@@ -58,29 +58,39 @@ int main(int argc, char **argv)
 	
 	char buffer[1];
 	int file;
-	if(inputFile)
-	{
-		printf("tried to open\n\n");
-		file = open(inputFile, O_RDONLY);
-	}
-	if (file == -1)
+	ssize_t size;
+	uint64_t inputFileLength = 0;
+	
+	file = open(inputFile, O_RDONLY);
+	if(file == -1)
 	{
 		perror(inputFile);
 		exit(errno);
-        printf("Error Opening %s\n", inputFile);
-    }
-	else
-	{
-		while( read(file, buffer, 1) == 1 )
-		{
-			int index = (int) buffer[0];
-			histogram[ index ]++;
-		}
-		histogram[0]++;
-		histogram[255]++;
 	}
-	close(file);
-		
+
+	while( (size = read(file, buffer, 1)) > 0 )
+	{
+		int index = (int) buffer[0];
+		histogram[ index ]++;
+		//gets input file length
+		inputFileLength++;
+	}
+	
+	if (size == -1)									//error checking for read()
+	{
+		perror(inputFile);
+		exit(errno);
+	}
+	histogram[0]++;
+	histogram[255]++;
+	
+	//closes file
+	size = close(file);
+	if(size == -1)		
+	{
+		perror(inputFile);
+		exit(errno);
+	}
 	
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,7 +101,7 @@ int main(int argc, char **argv)
 	{
 		if(histogram[i] != 0)
 		{
-			///printf("%d\n", i);
+			//printf("%d\n", i);
 			treeNode *newTree = newNode(i, 0, histogram[i]);	//new node for each item in histogram
 			enqueue(priorityQueue, *newTree);							//puts each node in priority queue
 			//printf("symbol: %x, count: %lu, leaf: %d\n", newTree->symbol, newTree->count, newTree->leaf);
@@ -127,9 +137,9 @@ int main(int argc, char **argv)
 		
 		treeNode *internalNode = join(leaf0, leaf1);	//joins two leaf
 		//debug
-		// printf("HEAD symbol: %x, count: %lu, leaf: %d\n", internalNode->symbol, internalNode->count, internalNode->leaf);
-		// printf("RIGHT symbol: %x, count: %lu, leaf: %d\n", internalNode->right->symbol, internalNode->right->count, internalNode->right->leaf);
-		// printf("LEFT symbol: %x, count: %lu, leaf: %d\n", internalNode->left->symbol, internalNode->left->count, internalNode->left->leaf);
+		// printf("HEAD symbol: %c, count: %lu, leaf: %d\n", internalNode->symbol, internalNode->count, internalNode->leaf);
+		// printf("RIGHT symbol: %c, count: %lu, leaf: %d\n", internalNode->right->symbol, internalNode->right->count, internalNode->right->leaf);
+		// printf("LEFT symbol: %c, count: %lu, leaf: %d\n", internalNode->left->symbol, internalNode->left->count, internalNode->left->leaf);
 		enqueue(priorityQueue, *internalNode);
 		
 		//printf("symbol: %x, count: %lu, leaf: %d\n\n", priorityQueue->Q[3].symbol, priorityQueue->Q->count, priorityQueue->Q->leaf);
@@ -138,6 +148,11 @@ int main(int argc, char **argv)
 			*root = *internalNode;
 		}
 	}
+		///////////////////////////////////////////////////////////////////////////////////////
+
+	
+
+	
 	
 	//delete priority Queue
 	delQueue(priorityQueue);
@@ -145,7 +160,7 @@ int main(int argc, char **argv)
 	
 	
 	
-	printTree(root, 1);
+	//printTree(root, 1);
 	
 	
 	///////////////////////////////////////////////////////////////////////////////////////
@@ -161,156 +176,144 @@ int main(int argc, char **argv)
 	buildCode(root, code, codeTable, &leafCount);
 	
 	
-	for(int i = 0; i < 256; i++)
-	{
-		if(codeTable[i].l != 0)
-		{
-			//printf("symbol %c: %x, length: %u\n", i, codeTable[i].bits[0], codeTable[i].l);
-		}
-	}
+	// for(int i = 0; i < 256; i++)
+	// {
+		// if(codeTable[i].l != 0)
+		// {
+			// printf("symbol %c: %x, length: %u\n", i, codeTable[i].bits[0], codeTable[i].l);
+		// }
+	// }
 	
 	///////////////////////////////////////////////////////////////////////////////////////
 	//write to output file
 
-	//gets input file length
-	FILE *filePointer = fopen(inputFile, "r");
-	fseek(filePointer, 0, SEEK_END);
-	uint64_t inputFileLength = ftell(filePointer);
 
 	
 	uint16_t treeSize = 3*leafCount - 1;
-	
+	//printf("leafCount: %u\n", leafCount);
+	int file1;
 	
 	if(outputFile)	//writes to outputFile
 	{
-		file = open(outputFile, O_WRONLY);
-		write(file, &magicNumber, sizeof(uint32_t));
-		write(file, &inputFileLength, sizeof(uint64_t));
-		write(file, &treeSize, sizeof(uint16_t));
-		dumpTree(root, file);
-		close(file);
-		fclose(filePointer);
+		file1 = open(outputFile, O_WRONLY);
+		
+		write(file1, &magicNumber, 4);
+		write(file1, &inputFileLength, 8);
+		write(file1, &treeSize, 2);
+		dumpTree(root, file1);
+		//close(file);
+		//fclose(filePointer);
 	}
 	else			//writes to standard output
 	{
-		write(1, &magicNumber, sizeof(uint32_t));
-		write(1, &inputFileLength, sizeof(uint64_t));
-		write(1, &treeSize, sizeof(uint16_t));
+		// printf("%x\n", magicNumber);
+		// printf("%lx\n", inputFileLength);
+		// printf("%x\n", treeSize);
+		write(1, &magicNumber, 4);
+		write(1, &inputFileLength, 8);
+		write(1, &treeSize, 2);
 		dumpTree(root, 1);
 	}
 	
+	
+	file = open(inputFile, O_RDONLY);
+	if(file == -1)
+	{
+		perror(inputFile);
+		exit(errno);
+	}
+
+	uint8_t bitVector = 0;
+	int j = 0;
+
+	while( (size = read(file, buffer, 1)) > 0 )		//reads through file byte by byte
+	{
+
+		int index = (int) buffer[0];		//has value '0x0', '0x1', ... '0xFF'
+		// printf("\ncode length: %u\n", codeTable[index].l);
+		//for(int i = (codeTable[index].l-1); i >= 0  ; i--)			//reverse order of bits
+		for(uint32_t i = 0; i < codeTable[index].l ; i++)
+		{
+			int bitVectorIndex = 0;
+			if(i < 8)				//chooses which array of bitvectors
+			{
+				bitVectorIndex = 0;
+			}
+			else if(8 <= i && i < 16)
+			{
+				bitVectorIndex = 1;
+			}
+			else if(16 <= i && i < 24)
+			{
+				bitVectorIndex = 2;
+			}
+			else if(24<= i && i < 32)
+			{
+				bitVectorIndex = 3;
+			}
+			
+			
+			if( ((codeTable[index].bits[bitVectorIndex] & (1<<i))<<i) == 0)		//clear bit
+			{
+				//printf("clear %uth bit\n", j);
+				bitVector &= ~(0x01 << j);
+				//printf("\nbitvector is: %x\n", bitVector);
+			}
+			else									//set bit
+			{
+				//printf("set %uth bit\n", j);
+				bitVector |= (0x01 << j);
+				//printf("\nbitvector is: %x\n", bitVector);
+			}
+			j++;
+			
+			if(j == 8)			//if bitVector is full
+			{
+				if(outputFile)
+				{
+					//printf("\nbitvector is: %x\n", bitVector);
+					write(file1, &bitVector, 1);
+				}
+				else
+				{
+					//printf("\nbitvector is: %x\n", bitVector);
+					write(1, &bitVector, 1);
+				}
+				j = 0;		//reset j
+				bitVector = 0;
+			}			
+		}
+	}
+	//printf("bitvector: x%x\n", bitVector);
+	if(outputFile)			//prints out any remainder
+	{
+		write(file1, &bitVector, 1);
+	}
+	else
+	{
+		write(1, &bitVector, 1);
+	}
+	
+
+	
+	if (size == -1)									//error checking for read()
+	{
+		perror(inputFile);
+		exit(errno);
+	}
+	
+	//closes file
+	size = close(file);
+	if(size == -1)		
+	{
+		perror(inputFile);
+		exit(errno);
+	}
+	
+	
 	printf("\n");
 	
-	
-	
-	
-	
-	///////////////////////////////////////////////////////////////////////////////////////
-	//dequeue to test to see if huffman tree works
-	
-	// do
-		// {
 		
-		// printf("head: %u\n", priorityQueue->head);
-		// printf("tail: %u\n", priorityQueue->tail);
-			// uint32_t pop = 100000;
-			// printf("Popping %u elements\n", pop);
-			// for (uint32_t i = 0; i < pop; i += 1)
-			// {
-					// if (empty(priorityQueue))
-					// {
-							// printf("Woah! Empty after only %u!\n", i);
-							// break;
-					// }
-					// else
-					// {
-						// treeNode *newTree1 = malloc(sizeof(treeNode));
-						// newTree1->left = malloc(sizeof(treeNode));
-						// newTree1->right = malloc(sizeof(treeNode));
-							// (void) dequeue(priorityQueue, newTree1);
-							// printf("\t%4lu\n", newTree1->count);
-					// }
-			// }
-	// } while (!empty(priorityQueue));
-
-
-	
-	
-	//printTree(priorityQueue->Q, 1);
-	
-	
-	// printf("symbol: %x, count: %lu, leaf: %d\n", priorityQueue->Q->symbol, priorityQueue->Q->count, priorityQueue->Q->leaf);
-	// printf("symbol: %x, count: %lu, leaf: %d\n", 
-	// priorityQueue->Q->left->symbol, priorityQueue->Q->left->count, priorityQueue->Q->left->leaf);
-	// printf("symbol: %x, count: %lu, leaf: %d\n", 
-	// priorityQueue->Q->right->symbol, priorityQueue->Q->right->count, priorityQueue->Q->right->leaf);
-	// printTree(internalNode, 1);
-	
-	
-	///////////////////////////////////////////////////////////////////////////////////////
-	///////////////////////////////////////////////////////////////////////////////////////
-	
-	
-	
-	
-	
-	////////////////////////////////////////////////////////////////////////////////
-	//Testing queue
-	// uint32_t count = 0;
-	// queue   *q     = newQueue(2 * MAX);
-
-	// srandom((long) time((time_t *) 0));
-	// do
-	// {
-			// uint32_t add = random() % MAX;
-		// printf("head: %u\n", q->head);
-		// printf("tail: %u\n", q->tail);
-			// printf("Adding %u elements\n", add);
-			// for (uint32_t i = 0; i < add; i += 1)
-			// {
-					// if (full(q))
-					// {
-							// printf("Ouch! Full with only %u!\n", i);
-							// break;
-					// }
-					// else
-					// {
-						// treeNode *newTree = malloc(sizeof(treeNode));
-						// newTree->left = malloc(sizeof(treeNode));
-						// newTree->right = malloc(sizeof(treeNode));
-							// newTree->count = random() % 1000;
-							// printf("\t%4lu\n", newTree->count);
-							// (void) enqueue(q, *newTree);
-							// count += 1;
-					// }
-			// }
-
-			// uint32_t pop = random() % MAX;
-		// printf("head: %u\n", q->head);
-		// printf("tail: %u\n", q->tail);
-			// printf("Popping %u elements\n", pop);
-			// for (uint32_t i = 0; i < pop; i += 1)
-			// {
-					// if (empty(q))
-					// {
-							// printf("Woah! Empty after only %u!\n", i);
-							// break;
-					// }
-					// else
-					// {
-						// treeNode *newTree1 = malloc(sizeof(treeNode));
-						// newTree1->left = malloc(sizeof(treeNode));
-						// newTree1->right = malloc(sizeof(treeNode));
-							// (void) dequeue(q, newTree1);
-							// printf("\t%4lu\n", newTree1->count);
-					// }
-			// }
-	// } while (!empty(q));
-
-	
-
-	
-	
 	
 	
 	
