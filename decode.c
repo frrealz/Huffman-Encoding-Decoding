@@ -13,6 +13,48 @@
 
 treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
 
+
+// Build a tree  from  the  saved  tree
+treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
+{
+	stack *decStack = newStack();
+	printf("\n\nNode Format: symbol(leaf, count) Left symbol Right symbol\n");
+
+	for (uint16_t i = 0; i < treeBytes; i++)  
+	{  	
+		// If L, push the next char node to the stack
+		if(strncmp((char *)&savedTree[i],"L", 1) == 0)
+		{
+			i++;
+			treeNode *node = newNode(savedTree[i], 1, 1);
+			node->right = NULL;
+			node->left = NULL;
+			printf("Push %c(1, %llu)\n", node->symbol, node->count);
+			push(decStack, node);
+
+		}
+		// If I, pop the top two nodes, join them, and push their root to the stack
+		else if (strncmp((char *)&savedTree[i],"I", 1) == 0)
+		{
+			treeNode *right = pop(decStack);
+			printf("Pop %c(%d, %llu)\n", right->symbol, right->leaf, right->count);
+			treeNode *left = pop(decStack);
+			printf("Pop %c(%d, %llu)\n", left->symbol, left->leaf, left->count);
+			
+			treeNode *nodeI = join(left, right);
+			printTree(nodeI, 1);
+			printf("Push %c(%d, %llu) Right %c(%llu) Left %c(%llu)\n", nodeI->symbol, nodeI->leaf, nodeI->count, nodeI->right->symbol, nodeI->right->count, nodeI->left->symbol, nodeI->left->count);
+			push(decStack, nodeI);
+		}
+		
+		//printf("Stack top = %d\n", decStack->top);
+    }
+	//printTree(&decStack->entries[dec->top], 1);
+	return pop(decStack);
+}
+
+
+
 int main()	//int argc, char const *argv[])
 {
 	/*
@@ -39,8 +81,8 @@ int main()	//int argc, char const *argv[])
     } 
     */
     int inputFile = 0;
-	inputFile = open("/Users/nat/Desktop/secret.zzZ", O_RDONLY);
-	//inputFile = open("/afs/cats.ucsc.edu/users/g/darrell/secret.zzZ", O_RDONLY);
+	inputFile = open("/Users/nat/Desktop/testCoded.txt", O_RDONLY);
+	//inputFile = open("/afs/cats.ucsc.edu/users/g/narking/CS12B/narking/assignment4/testCoded.txt", O_RDONLY);
 	if(inputFile == 0)
 	{
 		printf("INPUT FILE IS NULL\n");
@@ -74,7 +116,7 @@ int main()	//int argc, char const *argv[])
     // Get file size (next 8 bytes)
     uint64_t fileSize;
     read(inputFile, &fileSize, 8);
-    printf("File size = %llu bytes\n", fileSize);  						// <<<<<<< %llu
+    printf("File size = %llu bytes\n", fileSize);  						// <<<<<<< %lllu
 
     
     // Get tree size (next 2 bytes)
@@ -94,26 +136,31 @@ int main()	//int argc, char const *argv[])
     printf("Bytes = %d\n", count);
 	
 	
-
-
-
-
 	// Load tree
     treeNode *mamaNode = loadTree(savedTree, treeSize);
     printf("mamaNode S = %c\n", mamaNode->symbol);
+    printf("mamaNode C = %llu\n", mamaNode->count);
     //printTree(mamaNode, 1);
+
+    printf("Root %c(%llu)\n", mamaNode->symbol, mamaNode->count);
+    printf("L%c(%llu) R%c(%llu)\n", mamaNode->left->symbol, mamaNode->left->count, mamaNode->right->symbol, mamaNode->right->count);
+    printf("LL%c(%llu) LR%c(%llu) ", mamaNode->left->left->symbol, mamaNode->left->left->count, mamaNode->left->right->symbol, mamaNode->left->right->count);
+    printf("RL%c(%llu) RR%c(%llu)\n", mamaNode->right->left->symbol, mamaNode->right->left->count, mamaNode->right->right->symbol, mamaNode->right->right->count);
+     //printf("LLL%c(%llu) LLR%c(%llu) ", mamaNode->left->left->left->symbol, mamaNode->left->left->left->count, mamaNode->left->right->symbol, mamaNode->left->left->right->count);
+    printf("RRL%c(%llu) RRR%c(%llu)\n", mamaNode->right->right->left->symbol, mamaNode->right->right->left->count, mamaNode->right->right->right->symbol, mamaNode->right->right->right->count);
+    printf("RRRL%c(%llu) RRRR%c(%llu)\n", mamaNode->right->right->right->left->symbol, mamaNode->right->right->right->left->count, mamaNode->right->right->right->symbol, mamaNode->right->right->right->count);
+    
+
+    
+
+	return 0;
+}
+
+
+	
 
     // // Begin 
    	// treeNode *mamaNode = popT(decStk);
-   
-
-    // printf("Mama:	Right = %c Left = %c\n", mamaNode->right->symbol, mamaNode->left->symbol);
-    // treeNode *tempR1 = mamaNode->right;
-    // treeNode *tempL1 = mamaNode->left;
-    // printf("R1:	Right = %c Left = %c\n", tempR1->right->symbol, tempR1->left->symbol);
-    // printf("L1:	Right = %c Left = %c\n", tempL1->right->symbol, tempL1->left->symbol);
-
-    // printTree(mamaNode, 20);
 
 
     /*
@@ -183,49 +230,7 @@ int main()	//int argc, char const *argv[])
 	}
 	*/
 
-	return 0;
-}
 
-
-/*
-LeLhLsIILlLdILnILaLpL,ILjLBIL_LXL*L?IL?LL^IL?L?IIIILQIIL+IIL7ILCIIL[
-L]IIL?L8ILSILxIL3L"ILMLDIL-IIIILwIIIIILiLoILfLkLPLWIL(IL)L2IIILvIILmL
-LcILGL6L?LOIIILAIL'LHIL:IL5LqILULzILJL!LKL?L?IL?L?IIL?L?IL?L?IIIIIL&
-LYILZIIIIL?IIIILbILuIILrL.L;LFLEIL9LVL?IIL4IIILTL1IL0LNILRLLIILIIIII
-LyLgIIIIL III
-*/
-
-// Build a tree  from  the  saved  tree
-treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
-{
-	stack *decStack = newStack();
-
-	for (uint16_t i = 0; i < treeBytes; i++)  
-	{  	
-		if(strncmp((char *)&savedTree[i],"L", 1) == 0)
-		{
-			i++;
-			treeNode *node = newNode(savedTree[i], 1, 0);
-			printf("L%c ", node->symbol);
-			push(decStack, node);
-
-		}
-		else if (strncmp((char *)&savedTree[i],"I", 1) == 0)
-		{
-			printf("-->I ");
-			treeNode *right = pop(decStack);
-			printf("R%c ", right->symbol);
-			treeNode *left = pop(decStack);
-			printf("L%c ", left->symbol);
-			treeNode *nodeI = join(left, right);
-			printf("I Right %c Left %c\n", nodeI->right->symbol, nodeI->left->symbol);
-			push(decStack, nodeI);
-		}
-		//printf("Stack top = %d\n", decStack->top);
-    }
-	
-	return pop(decStack);
-}
 
 
 
@@ -240,38 +245,6 @@ treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
 
 
 /*
-    //Prepare input file
-    FILE *inputFile;
-    if(in == NULL)
-    {
-    	printf("Failure to open file\n");
-    	return 0;
-    }
-    inputFile = fopen(in, "r");
-
-    //Prepare output file
-    FILE *outputFile;
-    if(out == NULL)
-    {
-    	printf("Failure to open file\n");
-    	return 0;
-    }
-    outputFile = fopen(out, "r");
-
-    int c;
-	FILE *file;
-	file = fopen("/afs/cats.ucsc.edu/users/g/darrell/secret.zzZ", "r");
-	if (file) 
-	{
-	    while ((c = getc(file)) != EOF)
-	    putchar(c);
-	    fclose(file);
-	}
-	else
-	{
-		printf("File is null\n");
-	}
-
 
 	// Print contents of a file
 	int c = 0;
