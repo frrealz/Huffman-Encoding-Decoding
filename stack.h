@@ -9,7 +9,7 @@ typedef struct stack
 {
         uint32_t size;
         uint32_t top;
-        treeNode *entries;
+        treeNode **entries;
 } stack;
 
 stack *newStack();
