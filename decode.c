@@ -6,60 +6,22 @@
 # include <string.h>
 # include <fcntl.h>
 # include <unistd.h>
+# include <errno.h>
+#include <sys/stat.h>
 
-# include "queue.h"
 # include "huffman.h"
 # include "stack.h"
+
+# define VECSIZE 1000
+
+
 
 treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
 
 
-// Build a tree  from  the  saved  tree
-treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
+int main(int argc, char const *argv[])
 {
-	stack *decStack = newStack();
-	printf("\n\nNode Format: symbol(leaf, count) Left symbol Right symbol\n");
-
-	for (uint16_t i = 0; i < treeBytes; i++)  
-	{  	
-		// If L, push the next char node to the stack
-		if(strncmp((char *)&savedTree[i],"L", 1) == 0)
-		{
-			i++;
-			treeNode *node = newNode(savedTree[i], 1, 1);
-			node->right = NULL;
-			node->left = NULL;
-			printf("Push %c(1, %llu)\n", node->symbol, node->count);
-			push(decStack, node);
-
-		}
-		// If I, pop the top two nodes, join them, and push their root to the stack
-		else if (strncmp((char *)&savedTree[i],"I", 1) == 0)
-		{
-			treeNode *right = pop(decStack);
-			printf("Pop %c(%d, %llu)\n", right->symbol, right->leaf, right->count);
-			treeNode *left = pop(decStack);
-			printf("Pop %c(%d, %llu)\n", left->symbol, left->leaf, left->count);
-			
-			treeNode *nodeI = join(left, right);
-			printTree(nodeI, 1);
-			printf("Push %c(%d, %llu) Right %c(%llu) Left %c(%llu)\n", nodeI->symbol, nodeI->leaf, nodeI->count, nodeI->right->symbol, nodeI->right->count, nodeI->left->symbol, nodeI->left->count);
-			push(decStack, nodeI);
-		}
-		
-		//printf("Stack top = %d\n", decStack->top);
-    }
-	//printTree(&decStack->entries[dec->top], 1);
-	return pop(decStack);
-}
-
-
-
-int main()	//int argc, char const *argv[])
-{
-	/*
-	//char *in = NULL;
-	int inputFile;
+	char *in = NULL;
 	char *out = NULL;
 
 	int get;
@@ -67,35 +29,51 @@ int main()	//int argc, char const *argv[])
 	{
 		switch (get)
       	{
-      		case 'i': 								
-				//in = optarg;     			
-      			inputFile = open("optarg", O_RDONLY);
+      		case 'i': 								    			
+      			in = optarg;
         	break;
       		case 'o':       		 								
 				out = optarg;
         	break;
         	default: 
-        		printf("DEFAULT CASE\n");
+      
         	break;
         }
     } 
-    */
-    int inputFile = 0;
-	inputFile = open("/Users/nat/Desktop/testCoded.txt", O_RDONLY);
-	//inputFile = open("/afs/cats.ucsc.edu/users/g/narking/CS12B/narking/assignment4/testCoded.txt", O_RDONLY);
-	if(inputFile == 0)
-	{
-		printf("INPUT FILE IS NULL\n");
-	}
+    
 
-	/*
-	int outFile = 0;
-	outFile = open("/Users/nat/Desktop/out.txt", O_CREAT, S_IRWXG);
-	if(outFile == 0)
+    // Prepare the input and output files
+    int inputFile = 0;
+	inputFile = open(in, O_RDONLY);
+	if(inputFile == -1)
 	{
-		printf("OUTPUT FILE IS NULL\n");
+		perror(in);
+		exit(errno);
 	}
-	*/
+	
+	int outFile = 0;
+	int oFlag = 0;
+	if(out)
+	{
+		oFlag = 1;
+		printf("./decode: %s:\n", out);
+		if(access(out, 0) != -1)
+		{
+			printf("Failure: that file already exists\n"); 
+			return 0;
+		}
+		else
+		{
+			outFile = open(out, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+			if(outFile == -1)
+			{
+				printf("File creation error\n");
+				return 0;
+			}
+
+		}
+	}
+	
 
     //Check magic number (first 4 bytes)
     uint32_t magicNum = 0xdeadd00d;
@@ -107,22 +85,16 @@ int main()	//int argc, char const *argv[])
     	printf("Error: Magic number not present\n");
     	return 0;
     }
-    else
-    {
-    	printf("Success!! Valid magic number\n");
-    }
 
     
     // Get file size (next 8 bytes)
     uint64_t fileSize;
     read(inputFile, &fileSize, 8);
-    printf("File size = %llu bytes\n", fileSize);  						// <<<<<<< %lllu
 
     
     // Get tree size (next 2 bytes)
 	uint16_t treeSize;
     read(inputFile, &treeSize, 2);
-    printf("Tree size = %d bytes\n", treeSize);
 
     
     // Allocate and fill savedTree array (next [treeSize] bytes)
@@ -132,135 +104,133 @@ int main()	//int argc, char const *argv[])
 			printf("Error in savedTree malloc\n");
 			return 0;
 		}
-    int count = read(inputFile, savedTree, treeSize);
-    printf("Bytes = %d\n", count);
-	
+    read(inputFile, savedTree, treeSize);
+
 	
 	// Load tree
     treeNode *mamaNode = loadTree(savedTree, treeSize);
-    printf("mamaNode S = %c\n", mamaNode->symbol);
-    printf("mamaNode C = %llu\n", mamaNode->count);
-    //printTree(mamaNode, 1);
+ 
 
-    printf("Root %c(%llu)\n", mamaNode->symbol, mamaNode->count);
-    printf("L%c(%llu) R%c(%llu)\n", mamaNode->left->symbol, mamaNode->left->count, mamaNode->right->symbol, mamaNode->right->count);
-    printf("LL%c(%llu) LR%c(%llu) ", mamaNode->left->left->symbol, mamaNode->left->left->count, mamaNode->left->right->symbol, mamaNode->left->right->count);
-    printf("RL%c(%llu) RR%c(%llu)\n", mamaNode->right->left->symbol, mamaNode->right->left->count, mamaNode->right->right->symbol, mamaNode->right->right->count);
-     //printf("LLL%c(%llu) LLR%c(%llu) ", mamaNode->left->left->left->symbol, mamaNode->left->left->left->count, mamaNode->left->right->symbol, mamaNode->left->left->right->count);
-    printf("RRL%c(%llu) RRR%c(%llu)\n", mamaNode->right->right->left->symbol, mamaNode->right->right->left->count, mamaNode->right->right->right->symbol, mamaNode->right->right->right->count);
-    printf("RRRL%c(%llu) RRRR%c(%llu)\n", mamaNode->right->right->right->left->symbol, mamaNode->right->right->right->left->count, mamaNode->right->right->right->symbol, mamaNode->right->right->right->count);
-    
-
-    
-
-	return 0;
-}
-
-
-	
-
-    // // Begin 
-   	// treeNode *mamaNode = popT(decStk);
-
-
-    /*
-   
-    uint8_t byteCheck = 0;
+    // Decode the bits
+	treeNode * nodePtr = mamaNode;
+    uint8_t currentByte = 0;
     uint64_t bytesRead = 0;
-    treeNode * nodePtr = mamaNode;
-    int saveIndex = 0;
-    
-    printf("Outside while\n");
-    while(bytesRead < 20)
-    {
-    	printf("\n\n >>>>>>>>>>>While(%llu)\n", bytesRead);
-    	read(inputFile, &byteCheck, 1);
+    int saveIndex = 0;   
 
+    uint32_t readCheck = 1;
+    while(readCheck > 0)
+    {
+    readCheck = read(inputFile, &currentByte, 1);
+	    
 	    for(int i = 0; i < 8; i++)
 	    {
+	    	// Go back to the root if index not saved
 	    	if(saveIndex == 0)
 	    	{
-	    		printf("Reset\n");
 	    		nodePtr = mamaNode;
 	    		saveIndex = 1;
 	    	}
+			
 
-	    	printf("Byte %d\n", i);
-	    	printf("byteCheck = %d\n", byteCheck);
-	    	uint8_t bitVal = byteCheck & (128 >> i);
-	    	printf("bitVal = %d\n", bitVal);
-	
-	    	if (bitVal == 0)
+	    	uint8_t bitVal = currentByte & (1 << i);
+	    	if(bitVal != 0)
 	    	{
-	    		printf("Move Left\n");
+	    		bitVal = 1;
+	    	}
+			
+			// Once you print all the expected file characters...
+			if(bytesRead >= fileSize)
+	    	{
+	    		// ...don't print the last dead bits
+	    	}
+	    	// If the bit is a 0, print the left
+	    	else if (bitVal == 0)
+	    	{
 	    		nodePtr = nodePtr->left;
 
 	    		if(nodePtr->leaf == 1)
 	    		{
-	    			printf("Leaf ");
-	    			write(outFile, &nodePtr->symbol, 1);
+	    			if(oFlag == 1)
+	    			{
+	    				write(outFile, &(nodePtr->symbol), 1);
+	    			}
+	    			else
+	    			{
+	    				printf("%c", nodePtr->symbol);
+	    			}
+	    			bytesRead++;
 	    			saveIndex = 0;
-	    			printf("L = %hhu", nodePtr->symbol);
-	    		}
-	    		else
-	    		{
-	    			printf("I Node\n");
 	    		}
 	    	}
+	    	// If the bit is a 1, print the right
 	    	else
 	    	{
-	    		printf("Move Right\n");
 	    		nodePtr = nodePtr->right;
 
 	    		if(nodePtr->leaf == 1)
 	    		{
-	    			printf("Leaf ");
-	    			write(outFile, &nodePtr->symbol, 1);
+	    			if(oFlag == 1)
+	    			{
+	    				write(outFile, &(nodePtr->symbol), 1);
+	    			}
+	    			else
+	    			{
+	    				printf("%c", nodePtr->symbol);
+	    			}
+	    			bytesRead++;
 	    			saveIndex = 0;
-	    			printf("R = %hhu", nodePtr->symbol);
-	    		}
-	    		else
-	    		{
-	    			printf("I Node\n");
 	    		}
 	    	}
-	    	printf("\n");
 	    }
-	    bytesRead++;
 	}
-	*/
+	if(oFlag == 1)
+	{
+		printf("Success\n");
+	}
+	else
+	{
+		printf("\n");
+	}
+	return 0;
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-	// Print contents of a file
-	int c = 0;
-		FILE *file;
-		file = fopen("/Users/nat/Desktop/secret.zzZ", "r");
-		if (file) 
+// Build a tree  from  the  saved  tree
+treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
+{
+	stack *decStack = newStack();
+	uint16_t i = 0;
+	while(i < treeBytes)  
+	{  	
+		// If L, push the next char node to the stack
+		if(strncmp((char *)&savedTree[i],"L", 1) == 0)										
 		{
-			printf("File not null\n");
-		    while ((c = getc(file)) != EOF)
-	        	putchar(c);
-		    fclose(file);
-		}
-		else
-		{
-			printf("File is null\n");
-		}
-*/
+			i++;
+			treeNode *node = newNode(savedTree[i], 1, 1);
+			push(decStack, node);
+			i++;
 
+		}
+		// If I, pop the top two nodes, join them, and push their root to the stack
+		else if (strncmp((char *)&savedTree[i],"I", 1) == 0)								
+		{
+			if(decStack->top > 1)
+			{
+				treeNode *right = pop(decStack);
+				treeNode *left = pop(decStack);
+				
+				treeNode *nodeI = join(left, right);
+				push(decStack, nodeI);
+				i++;
+			}
+			else
+			{
+				treeNode *right = pop(decStack);
+				treeNode *nodeI = newNode(0x24, 0, right->count);
+				nodeI->right = right;
+			}
+		}
+    }
+	return pop(decStack);
+}
 
