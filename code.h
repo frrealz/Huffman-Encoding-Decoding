@@ -6,14 +6,14 @@
 
 typedef  struct  code
 {
-	uint8_t  bits [32];
+	uint32_t  bits [8];
 	uint32_t l;
 } code;
 
 static  inline  code  newCode ()
 {
 	code t;
-	for (int i = 0; i < 32; i += 1)
+	for (int i = 0; i < 8; i += 1)
 	{
 		t.bits[i] = 0;
 	}
@@ -29,12 +29,12 @@ static  inline  bool  pushCode(code *c, uint32_t k)
 	}
 	else if (k == 0)
 	{
-		c->bits[c->l / 8] &= ~(0x1 << (c->l % 8));
+		c->bits[c->l / 32] &= ~(0x1 << (c->l % 32));
 		c->l += 1;
 	}
 	else
 	{
-		c->bits[c->l / 8] |=   (0x1 << (c->l % 8));
+		c->bits[c->l / 32] |=   (0x1 << (c->l % 32));
 		c->l += 1;
 	}
 	return  true;
@@ -49,7 +49,7 @@ static  inline  bool  popCode(code *c, uint32_t *k)
 	else
 	{
 		c->l  -= 1;
-		*k = ((0x1 << (c->l % 8)) & c->bits[c->l / 8])  >> (c->l % 8);
+		*k = ((0x1 << (c->l % 32)) & c->bits[c->l / 32])  >> (c->l % 32);
 		return  true;
 	}
 }
