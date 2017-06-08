@@ -7,7 +7,7 @@
 # include <fcntl.h>
 # include <math.h>
 # include <errno.h>
-# include <time.h>
+# include <sys/stat.h>
 
 # include "queue.h"
 # include "huffman.h"
@@ -187,16 +187,50 @@ int main(int argc, char **argv)
 	
 	uint16_t treeSize = 3*leafCount - 1;
 	//printf("leafCount: %u\n", leafCount);
+	int file1;
 	
-	
-	int file1 = open(outputFile, O_WRONLY);
+	// if(outputFile)
+	// {
+		// file1 = open(outputFile, O_WRONLY);
 
-	if(file1 == -1)
+		// if(file1 == -1)
+		// {
+			// perror(outputFile);
+			// exit(errno);
+		// }
+		
+		
+		// if(access(outputFile, 0) == -1)
+		// {
+			// file1 = open(outputFile, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+			// if(file1 == -1)
+			// {
+				// perror(outputFile);
+				// exit(errno);
+			// }
+		// }
+	// }
+	//int flag = 0;
+	if(outputFile)
 	{
-		perror(outputFile);
-		exit(errno);
+		if(access(outputFile, 0) == -1)
+		{
+			//flag = 1;
+			//printf("./decode: %s:\n", outputFile);
+			file1 = open(outputFile, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+			if(file1 == -1)
+			{
+				printf("File creation error\n");
+				return 0;
+			}
+
+		}
+		else
+		{
+			file1 = open(outputFile, O_WRONLY);
+		}
 	}
-	
+
 	
 	if(outputFile)	//writes to outputFile
 	{
