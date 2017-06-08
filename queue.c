@@ -11,7 +11,7 @@ queue *newQueue(uint32_t  size)
 	newQ->size = size;
 	newQ->head = 0;
 	newQ->tail = 0;
-	newQ->Q = malloc(sizeof(treeNode));
+	newQ->Q = malloc(sizeof(treeNode)*size);
 	
 	return (newQ);
 }
@@ -19,7 +19,7 @@ queue *newQueue(uint32_t  size)
 // Destructor
 void delQueue(queue *q)      
 {
-	free(q->Q);
+	//free(q->Q);
 	free(q);
 }
 
@@ -85,7 +85,7 @@ bool enqueue(queue *q, treeNode i)
 					while(b != a)
 					{
 						// If head is 0, skip to the other end
-						if(b == 0)
+						if(b == q->tail)
 						{
 							// Shift array over to other end
 							q->Q[b]= q->Q[q->size];
@@ -106,7 +106,7 @@ bool enqueue(queue *q, treeNode i)
 
 				if(a == q->size)
 				{
-					a = 0;
+					a = q->head;
 				}
 				else
 				{
@@ -127,15 +127,18 @@ bool enqueue(queue *q, treeNode i)
 }
 
 // Remove from the rear
+
+
+//Remove from the rear
 bool dequeue(queue *q, treeNode *i) 
 {
-	// From Darrell's code
 	if (empty(q))
 	{
 		return false;
 	}
 	else
 	{
+
 		*i = q->Q[q->tail];
 		q->tail = (q->tail + 1) % q->size;
 		return true;
