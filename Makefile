@@ -28,5 +28,4 @@ queue.o: queue.c queue.h
 
 .PHONY: clean
 clean:
-	rm decode.o stack.o huffman.o decode
-	rm encode.o queue.o huffman.o encode
+	rm decode.o stack.o huffman.o decode encode.o queue.o encode
