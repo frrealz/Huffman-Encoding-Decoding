@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
 	while( (size = read(file, buffer, 1)) > 0 )
 	{
-		int index = (int) buffer[0];
+		uint8_t index = (int) buffer[0];
 		histogram[ index ]++;
 		//gets input file length
 		inputFileLength++;
@@ -124,10 +124,8 @@ int main(int argc, char **argv)
 		
 		dequeue(priorityQueue, leaf0);
 		dequeue(priorityQueue, leaf1);
-		// treeNode leaf0 = dequeue(priorityQueue);
-		// treeNode leaf1 = dequeue(priorityQueue);
-		
-		
+
+
 		// printf("symbol: %x, count: %lu, leaf: %d\n", leaf0->symbol, leaf0->count, leaf0->leaf);
 		if(leaf0->symbol != 0x24)
 		{
@@ -191,25 +189,29 @@ int main(int argc, char **argv)
 	//printf("leafCount: %u\n", leafCount);
 	
 	
+	int file1 = open(outputFile, O_WRONLY);
+
+	if(file1 == -1)
+	{
+		perror(outputFile);
+		exit(errno);
+	}
 	
-	int file1;
 	
 	if(outputFile)	//writes to outputFile
 	{
-		file1 = open(outputFile, O_WRONLY);
-		if(file1 == -1)
-		{
-			perror(outputFile);
-			exit(errno);
-		}
-		
 		write(file1, &magicNumber, 4);
 		write(file1, &inputFileLength, 8);
 		write(file1, &treeSize, 2);
 		dumpTree(root, file1);
+		//close(file);
+		//fclose(filePointer);
 	}
 	else			//writes to standard output
 	{
+		// printf("%x\n", magicNumber);
+		// printf("%lx\n", inputFileLength);
+		// printf("%x\n", treeSize);
 		write(1, &magicNumber, 4);
 		write(1, &inputFileLength, 8);
 		write(1, &treeSize, 2);
@@ -235,7 +237,6 @@ int main(int argc, char **argv)
 	
 	while( (size = read(file, buffer, 1)) > 0 )		//reads through file byte by byte
 	{
-
 		uint8_t index = (int) buffer[0];		//has value '0x0', '0x1', ... '0xFF'
 		// printf("\ncode length: %u\n", codeTable[index].l);
 		//for(int i = (codeTable[index].l-1); i >= 0  ; i--)			//reverse order of bits
@@ -309,8 +310,7 @@ int main(int argc, char **argv)
 		
 	if(verboseMode == 1)
 	{
-		printf("Original %lu bits: leaves %d (%u bytes) encoding %lu bits(%f%%)\n", inputFileLength*8, leafCount, treeSize, bitsEncoded, ((float)bitsEncoded*100/((float)inputFileLength*8)));
+		printf("\nOriginal %lu bits: leaves %d (%u bytes) encoding %lu bits(%f%%)\n", inputFileLength*8, leafCount, treeSize, bitsEncoded, ((float)bitsEncoded*100/((float)inputFileLength*8)));
 	}
 	return 0;
 }
-
