@@ -24,8 +24,10 @@ int main(int argc, char const *argv[])
 	char *in = NULL;
 	char *out = NULL;
 
+	int verbose = 0;
+	int print = 0;
 	int get;
-	while ((get = getopt(argc, (char *const *)argv, "i:o:")) != -1)
+	while ((get = getopt(argc, (char *const *)argv, "i:o::vp")) != -1)
 	{
 		switch (get)
       	{
@@ -34,6 +36,12 @@ int main(int argc, char const *argv[])
         	break;
       		case 'o':       		 								
 				out = optarg;
+        	break;
+        	case 'v':       		 								
+				verbose = 1;
+        	break;
+        	case 'p':       		 								
+				print = 1;
         	break;
         	default: 
       
@@ -56,14 +64,15 @@ int main(int argc, char const *argv[])
 	if(out)
 	{
 		oFlag = 1;
-		printf("./decode: %s:\n", out);
 		if(access(out, 0) != -1)
 		{
+			printf("./decode: %s:\n", out);
 			printf("Failure: that file already exists\n"); 
 			return 0;
 		}
 		else
 		{
+			printf("./decode: %s:\n", out);
 			outFile = open(out, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 			if(outFile == -1)
 			{
@@ -106,9 +115,17 @@ int main(int argc, char const *argv[])
 		}
     read(inputFile, savedTree, treeSize);
 
+
+    // Print verbose facts
+    if(verbose == 1)
+    {
+    	printf("Original %lu bits: tree(%d)\n", (fileSize * 8), treeSize);
+    }
+
 	
 	// Load tree
     treeNode *mamaNode = loadTree(savedTree, treeSize);
+
  
 
     // Decode the bits
@@ -183,6 +200,14 @@ int main(int argc, char const *argv[])
 	    	}
 	    }
 	}
+
+
+	// Print tree (-p)
+	if(print)
+	{
+		printTree()
+	}
+
 
 	// Delete the tree
 	delTree(mamaNode);
