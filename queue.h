@@ -2,8 +2,8 @@
 # define  _QUEUE_H
 # include <stdio.h>
 # include <stdlib.h>
-# include  <stdint.h>
-# include  <stdbool.h>
+# include <stdint.h>
+# include <stdbool.h>
 
 # include "huffman.h"
 
@@ -38,6 +38,7 @@ bool  full (queue *q);             // Is it full?
 
 bool  enqueue(queue *q, treeNode i); // Add an item
 
-bool  dequeue(queue *q, treeNode *i); //  Remove  from  the  rear
+bool dequeue(queue *q, treeNode *i); //  Remove  from  the  rear
+//treeNode *dequeue(queue *q); //  Remove  from  the  rear
 
 # endif
