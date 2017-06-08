@@ -32,13 +32,13 @@ int main(int argc, char const *argv[])
       			in = optarg;
         	break;
       		case 'o':       		 								
-				out = optarg;
+			out = optarg;
         	break;
         	case 'v':       		 								
-				verbose = 1;
+			verbose = 1;
         	break;
         	case 'p':       		 								
-				print = 1;
+			print = 1;
         	break;
         	default: 
       
@@ -116,7 +116,7 @@ int main(int argc, char const *argv[])
     // Print verbose facts
     if(verbose == 1)
     {
-    	printf("Original %llu bits: tree(%d)\n", (fileSize * 8), treeSize);
+    	printf("Original %lu bits: tree(%d)\n", (fileSize * 8), treeSize);
     }
 
 	
