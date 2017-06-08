@@ -21,7 +21,7 @@ void  dumpTree(treeNode *t, int file)
 		if(file == -1)		//writes to standard output
 		{
 			write(1, "L", 1);
-			if(write(1, &t->symbol, 8) != 8)
+			if(write(1, &t->symbol, 1) != 1)
 			{
 				printf("error copying tree into file\n");
 				return;
@@ -30,7 +30,7 @@ void  dumpTree(treeNode *t, int file)
 		else		//writes to file
 		{
 			write(file, "L", 1);
-			if(write(file, &t->symbol, 8) != 8)
+			if(write(file, &t->symbol, 1) != 1)
 			{
 				printf("error copying tree into file\n");
 				return;
@@ -41,53 +41,38 @@ void  dumpTree(treeNode *t, int file)
 	{
 		if(file == -1)		//writes to standard output
 		{
-			write(1, "I", 1);
+			
 			dumpTree(t->left, file);
 			dumpTree(t->right, file);
+			write(1, "I", 1);
 		}
 		else		//writes to file
 		{
-			write(file, "I", 1);
+			
 			dumpTree(t->left, file);
 			dumpTree(t->right, file);
+			write(file, "I", 1);
 		}
 	}
 	return;
 }
 
-/*
 // Build a tree  from  the  saved  tree
 treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
 {
-	stackT *decStack = newStack();
-
-	for (uint16_t i = 0; i < treeBytes; i++)  
-	{  	
-		if(strncmp((char *)&savedTree[i],"L", 1) == 0)
-		{
-			i++;
-			treeNode *node = newNode(savedTree[i], 1, 0);
-			printf("L%c ", node->symbol);
-			push(decStack, node);
-
-		}
-		else if (strncmp((char *)&savedTree[i],"I", 1) == 0)
-		{
-			printf("I ");
-			treeNode *right = pop(decStack);
-			printf("pop %c ", right->symbol);
-			treeNode *left = pop(decStack);
-			printf("pop %c ", left->symbol);
-			treeNode *nodeI = join(left, right);
-			push(decStack, nodeI);
-		}
-		//printf("Stack top = %d\n", decStack->top);
-    }
+	//just to test
+	treeNode *test = newNode(1, 0, 3);
+	if(savedTree)
+	{
+		
+	}
+	if(treeBytes)
+	{
+		
+	}
+	return test;
 	
-	return pop(decStack);
 }
-*/
-
 
 // Step  through a tree  following  the  code
 int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code)
@@ -109,23 +94,19 @@ void  buildCode(treeNode *t, code s, code table[256], uint16_t *leafCount)
 {
 	if (t && t->leaf)
 	{
-		leafCount++;		//increments how many leaves
+		(*leafCount)++;		//increments how many leaves
+		//printf("symbol: %c, code: %u, length: %u\n", t->symbol, s.bits[0], s.l);
 		table[t->symbol] = s;
 		
 		//so you only get correct codes if you print in reverse
-		printf("symbol %c: %x, length: %u\n", t->symbol, s.bits[0], s.l);
+		//printf("symbol %c: %x, length: %u\n", t->symbol, s.bits[0], s.l);
 	}
 	else if (t)
 	{
-		printf("push 0\n");
 		pushCode(&s, 0);
 		buildCode(t->left, s, table, leafCount);				//left side
-		
-		
 		uint32_t pop = 2;
-		printf("pop\n");
 		popCode(&s, &pop);
-		printf("push 1\n");
 		pushCode(&s, 1);
 		buildCode(t->right, s, table, leafCount);				//right side
 	}
