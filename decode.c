@@ -183,6 +183,10 @@ int main(int argc, char const *argv[])
 	    	}
 	    }
 	}
+
+	// Delete the tree
+	delTree(mamaNode);
+
 	if(oFlag == 1)
 	{
 		printf("Success\n");
@@ -231,6 +235,8 @@ treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
 			}
 		}
     }
-	return pop(decStack);
+    treeNode *rootNode = pop(decStack);
+    delStack(decStack);
+	return rootNode;
 }
 
