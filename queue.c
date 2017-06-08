@@ -126,8 +126,6 @@ bool enqueue(queue *q, treeNode i)
 	return 0;
 }
 
-// Remove from the rear
-
 
 //Remove from the rear
 bool dequeue(queue *q, treeNode *i) 
