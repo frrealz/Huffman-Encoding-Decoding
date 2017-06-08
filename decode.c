@@ -7,13 +7,10 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <errno.h>
-#include <sys/stat.h>
+# include <sys/stat.h>
 
 # include "huffman.h"
 # include "stack.h"
-
-# define VECSIZE 1000
-
 
 
 treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
@@ -119,7 +116,7 @@ int main(int argc, char const *argv[])
     // Print verbose facts
     if(verbose == 1)
     {
-    	printf("Original %lu bits: tree(%d)\n", (fileSize * 8), treeSize);
+    	printf("Original %llu bits: tree(%d)\n", (fileSize * 8), treeSize);
     }
 
 	
@@ -202,24 +199,28 @@ int main(int argc, char const *argv[])
 	}
 
 
+	if(oFlag)
+	{
+		printf("Success\n");
+		close(outFile);
+	}
+	else
+	{
+		printf("\n");
+	}
+	close(inputFile);
+
+
 	// Print tree (-p)
 	if(print)
 	{
-		printTree()
+		printTree(mamaNode, 1);
 	}
 
 
 	// Delete the tree
 	delTree(mamaNode);
 
-	if(oFlag == 1)
-	{
-		printf("Success\n");
-	}
-	else
-	{
-		printf("\n");
-	}
 	return 0;
 }
 
