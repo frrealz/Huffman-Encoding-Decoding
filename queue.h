@@ -8,24 +8,11 @@
 # include "huffman.h"
 
 
-// typedef struct treeNode treeNode;
-
-// struct treeNode
-// {
-	// uint8_t   symbol;
-	// uint64_t  count;
-	// bool      leaf;
-	// treeNode *left , *right;
-// };
-
-//  treeNode  defined  in  huffman.h
-
-
 typedef  struct  queue
 {
-	uint32_t  size;         // How big is it?
-	uint32_t  head , tail; //  Front  and  rear  locations
-	treeNode *Q;                // Array to hold it (via  calloc)
+	uint32_t  size;         	// How big is it?
+	uint32_t  head , tail; 		//  Front  and  rear  locations
+	treeNode *Q;               	// Array to hold it (via  calloc)
 } queue;
 
 queue *newQueue(uint32_t  size); //  Constructor
