@@ -1,5 +1,7 @@
 # include "huffman.h"
 
+
+// Create a new treeNode
 treeNode *newNode(uint8_t s, bool l, uint64_t c)
 {
 	treeNode *newTree = malloc(sizeof(treeNode));
@@ -12,6 +14,7 @@ treeNode *newNode(uint8_t s, bool l, uint64_t c)
 	
 	return (newTree);
 }
+
 
 // Dump a Huffman  tree  onto a file
 void  dumpTree(treeNode *t, int file)
@@ -27,7 +30,7 @@ void  dumpTree(treeNode *t, int file)
 				return;
 			}
 		}
-		else		//writes to file
+		else		// Writes to file
 		{
 			write(file, "L", 1);
 			if(write(file, &t->symbol, 1) != 1)
@@ -39,14 +42,14 @@ void  dumpTree(treeNode *t, int file)
 	}
 	else if (t)
 	{
-		if(file == -1)		//writes to standard output
+		if(file == -1)		// Writes to standard output
 		{
 			
 			dumpTree(t->left, file);
 			dumpTree(t->right, file);
 			write(1, "I", 1);
 		}
-		else		//writes to file
+		else		// Writes to file
 		{
 			
 			dumpTree(t->left, file);
@@ -57,58 +60,24 @@ void  dumpTree(treeNode *t, int file)
 	return;
 }
 
-// Build a tree  from  the  saved  tree
-treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes)
-{
-	//just to test
-	treeNode *test = newNode(1, 0, 3);
-	if(savedTree)
-	{
-		
-	}
-	if(treeBytes)
-	{
-		
-	}
-	return test;
-	
-}
 
-// Step  through a tree  following  the  code
-int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code)
-{
-	//just to test
-	if(root)
-	{
-		
-	}
-	if(t && code)
-	{
-		
-	}
-	return 3;
-}
 
 // Parse a Huffman  tree to  build  codes
 void  buildCode(treeNode *t, code s, code table[256], uint16_t *leafCount)
 {
 	if (t && t->leaf)
 	{
-		(*leafCount)++;		//increments how many leaves
-		//printf("symbol: %c, code: %u, length: %u\n", t->symbol, s.bits[0], s.l);
+		(*leafCount)++;		// Increments how many leaves
 		table[t->symbol] = s;
-		
-		//so you only get correct codes if you print in reverse
-		//printf("symbol %c: %x, length: %u\n", t->symbol, s.bits[0], s.l);
 	}
 	else if (t)
 	{
 		pushCode(&s, 0);
-		buildCode(t->left, s, table, leafCount);				//left side
+		buildCode(t->left, s, table, leafCount);				// Left side
 		uint32_t pop = 2;
 		popCode(&s, &pop);
 		pushCode(&s, 1);
-		buildCode(t->right, s, table, leafCount);				//right side
+		buildCode(t->right, s, table, leafCount);				// Right side
 	}
 	return;
 }
@@ -126,7 +95,8 @@ void *delTree(treeNode *t)
 }
 
 
-treeNode *join(treeNode *l, treeNode *r)// Join  two  subtrees
+// Join  two  subtrees
+treeNode *join(treeNode *l, treeNode *r)
 {
 	treeNode *head = newNode(0x24, 0, (r->count + l->count));
 	head->left = l;
@@ -136,9 +106,7 @@ treeNode *join(treeNode *l, treeNode *r)// Join  two  subtrees
 } 
 
 
-//from Darrell
-
-
+// From Darrell
 void printTree(treeNode *t, int depth)
 {
         if (t && t->leaf)
@@ -160,9 +128,6 @@ void printTree(treeNode *t, int depth)
         }
         return;
 }
-
-
-
 
 
 
