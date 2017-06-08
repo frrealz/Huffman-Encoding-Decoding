@@ -22,17 +22,17 @@ struct  treeNode
 	treeNode *left , *right;
 };
 
-// New node , with  symbols , leaf or not , a count  associated  with it
+// New node, with symbols, leaf or not, a count associated with it
 treeNode *newNode(uint8_t s, bool l, uint64_t c);
 
-// Dump a Huffman  tree  onto a file
+// Dump a Huffman tree  onto a file
 void  dumpTree(treeNode *t, int  file);
 
-// Build a tree  from  the  saved  tree
-treeNode *loadTree(uint8_t  savedTree [], uint16_t  treeBytes);
+// Build a tree from the saved tree
+// Moved to loadTree
 
-// Step  through a tree  following  the  code
-int32_t  stepTree(treeNode *root , treeNode  **t, uint32_t  code);
+// Step through a tree following the code
+// Moved to loadTree
 
 // Parse a Huffman  tree to  build  codes
 void  buildCode(treeNode *t, code s, code table [256], uint16_t *leafCount);
@@ -47,10 +47,12 @@ static  inline  int8_t  compare(treeNode *l, treeNode *r)
 	return l->count - r->count; // l < r if negative , l = r if 0, ...
 }
 
-treeNode *join(treeNode *l, treeNode *r); // Join  two  subtrees
+// Join  two  subtrees
+treeNode *join(treeNode *l, treeNode *r); 
 
-//from Darrell
+// From Darrell
 static inline void spaces(int c) { for (int i = 0; i < c; i += 1) { putchar(' '); } return; }
 
+// From Darrell
 void printTree(treeNode *t, int depth);
 # endif
